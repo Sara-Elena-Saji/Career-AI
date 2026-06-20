@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Results · Career Compass AI</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      var saved = localStorage.getItem('theme');
+      if (saved === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="logo">
+      <span class="logo-icon">🧭</span>
+      <span class="logo-text">Career Compass <span class="logo-ai">AI</span></span>
+    </div>
+    <div class="header-right">
+      <span class="version-badge">v2.0</span>
+      <button type="button" id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero results-hero">
+      <p class="eyebrow">✦ Your Career Report</p>
+      <h1>Here's your path,<br><span class="highlight">{{ name }}.</span></h1>
+      <p class="hero-sub">We found <strong>{{ results|length }} career match{{ 'es' if results|length > 1 else '' }}</strong> ranked by AI scoring across your skills and interests.</p>
+    </section>
+
+    <section class="results-section">
+
+      <div class="results-meta">
+        <div class="meta-pill">
+          <span class="meta-label">Skills</span>
+          <span class="meta-value">{{ skills }}</span>
+        </div>
+        <div class="meta-pill">
+          <span class="meta-label">Interests</span>
+          <span class="meta-value">{{ interests }}</span>
+        </div>
+      </div>
+
+      <!-- Top 3 Career Cards -->
+      <div class="suggestions-grid">
+        {% for r in results %}
+        <div class="suggestion-card rank-{{ loop.index }}" style="--card-index: {{ loop.index }}">
+
+          <div class="card-top-row">
+            <div class="suggestion-rank">
+              {% if loop.index == 1 %}🥇 Best Match{% elif loop.index == 2 %}🥈 2nd Match{% else %}🥉 3rd Match{% endif %}
+            </div>
+            <div class="score-badge">{{ r.score }}%</div>
+          </div>
+
+          <h3 class="suggestion-title">{{ r.title }}</h3>
+
+          <!-- Score bar -->
+          <div class="score-bar-wrap">
+            <div class="score-bar-track">
+              <div class="score-bar-fill" style="--score: {{ r.score }}%"></div>
+            </div>
+            <span class="score-label">{{ r.score }}% match</span>
+          </div>
+
+          <!-- Tab Navigation -->
+          <div class="career-tabs" role="tablist" aria-label="{{ r.title }} details">
+            <button type="button" class="career-tab-btn is-active" role="tab" aria-selected="true" data-tab="overview">Overview</button>
+            <button type="button" class="career-tab-btn" role="tab" aria-selected="false" data-tab="roadmap">Roadmap</button>
+            <button type="button" class="career-tab-btn" role="tab" aria-selected="false" data-tab="coach">AI Coach</button>
+            <button type="button" class="career-tab-btn" role="tab" aria-selected="false" data-tab="skillgap">Skill Gap</button>
+          </div>
+
+          <!-- Tab Panels -->
+          <div class="career-tab-panels">
+
+            <!-- Overview -->
+            <div class="career-tab-panel is-active" role="tabpanel" data-panel="overview">
+              <div class="overview-panel">
+                <div class="overview-header">
+                  <span class="overview-career-title">{{ r.title }}</span>
+                  <span class="overview-score-badge">{{ r.score }}% Match</span>
+                </div>
+                <p class="overview-reason">{{ r.reason }}</p>
+              </div>
+            </div>
+
+            <!-- Roadmap -->
+            <div class="career-tab-panel" role="tabpanel" data-panel="roadmap">
+              <div class="roadmap">
+                <h4 class="roadmap-title">🗺 Roadmap</h4>
+                <ol class="roadmap-list">
+                  {% for step_title, step_desc in r.roadmap %}
+                  <li class="roadmap-item">
+                    <span class="roadmap-step-title">{{ step_title }}</span>
+                    <span class="roadmap-step-desc">{{ step_desc }}</span>
+                  </li>
+                  {% endfor %}
+                </ol>
+              </div>
+            </div>
+
+            <!-- AI Career Coach Advice -->
+            <div class="career-tab-panel" role="tabpanel" data-panel="coach">
+              <div class="advice-card">
+                <h4 class="advice-title">🤖 AI Career Coach Advice</h4>
+                <ul class="advice-list">
+                  <li class="advice-item">
+                    <span class="advice-num">1</span>
+                    <span class="advice-text"><strong>Learn missing technologies</strong> — {{ r.advice.learn }}</span>
+                  </li>
+                  <li class="advice-item">
+                    <span class="advice-num">2</span>
+                    <span class="advice-text"><strong>Build relevant projects</strong> — {{ r.advice.projects }}</span>
+                  </li>
+                  <li class="advice-item">
+                    <span class="advice-num">3</span>
+                    <span class="advice-text"><strong>Practice industry tools</strong> — {{ r.advice.tools }}</span>
+                  </li>
+                  <li class="advice-item">
+                    <span class="advice-num">4</span>
+                    <span class="advice-text"><strong>Create a portfolio</strong> — {{ r.advice.portfolio }}</span>
+                  </li>
+                  <li class="advice-item">
+                    <span class="advice-num">5</span>
+                    <span class="advice-text"><strong>Prepare for interviews</strong> — {{ r.advice.interview }}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Skill Gap Analysis -->
+            <div class="career-tab-panel" role="tabpanel" data-panel="skillgap">
+              <div class="skill-gap-card">
+                <h4 class="skill-gap-title">🧩 Skill Gap Analysis</h4>
+                <div class="skill-gap-columns">
+                  <div class="skill-gap-col">
+                    <span class="skill-gap-label skill-gap-label-current">✓ Current Skills</span>
+                    {% if r.skill_gap.current_skills %}
+                    <div class="skill-chip-list">
+                      {% for skill in r.skill_gap.current_skills %}
+                      <span class="skill-chip skill-chip-current">{{ skill }}</span>
+                      {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="skill-gap-empty">No required skills detected yet — that's okay, the roadmap tab will get you started.</p>
+                    {% endif %}
+                  </div>
+                  <div class="skill-gap-col">
+                    <span class="skill-gap-label skill-gap-label-missing">⚠ Missing Skills</span>
+                    {% if r.skill_gap.missing_skills %}
+                    <div class="skill-chip-list">
+                      {% for skill in r.skill_gap.missing_skills %}
+                      <span class="skill-chip skill-chip-missing">{{ skill }}</span>
+                      {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="skill-gap-empty">You've got every core skill covered for this role!</p>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="suggestion-footer">
+            <span class="fit-badge">✓ Strong Fit</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Next Steps -->
+      <div class="next-steps">
+        <h3>📌 General Next Steps</h3>
+        <ul>
+          <li>Research your top match on LinkedIn, Glassdoor, and Levels.fyi</li>
+          <li>Start a free course on Coursera, edX, or YouTube for your #1 career</li>
+          <li>Build one small project to test your interest and gain portfolio work</li>
+          <li>Connect with 2–3 professionals in your target field on LinkedIn</li>
+        </ul>
+      </div>
+
+      <div class="cta-row">
+        <a href="/" class="btn-primary">Try Again →</a>
+        <button onclick="window.print()" class="btn-secondary">Save as PDF</button>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Career Compass AI · Built for students, by design · v2.0</p>
+  </footer>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
